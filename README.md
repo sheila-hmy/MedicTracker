@@ -2,6 +2,13 @@
 
 MedicTracker est une application simple de suivi des patients développée avec Flask et MySQL.
 
+## FRONTEND
+
+- Vue.js
+  
+```npm run serve```
+
+## BACKEND
 ## Configuration
 
 ### Prérequis
