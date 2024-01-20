@@ -36,10 +36,10 @@
         const confirmed = window.confirm('Êtes-vous sûr de vouloir supprimer ce patient?');
   
         if (confirmed) {
-          axios.delete(`http://localhost:5000/patients/${this.selectedPatient}`)
+          axios.delete(`http://localhost:5000/delete/${this.selectedPatient}`)
             .then(response => {
               console.log(response.data.message);
-              this.$router.push({ name: 'PatientList' }); // Rediriger vers la liste des patients après la suppression
+              window.location.reload();
             })
             .catch(error => {
               console.error('Une erreur s\'est produite lors de la suppression du patient', error);

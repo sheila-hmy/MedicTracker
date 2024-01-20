@@ -1,78 +1,99 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_mysqldb import MySQL
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from datetime import datetime
+
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
 
-# Configuration de la base de données MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'  # Utilisez le nom d'utilisateur MySQL que vous avez configuré
-app.config['MYSQL_PASSWORD'] = '123456'  # Utilisez le mot de passe MySQL que vous avez configuré
-app.config['MYSQL_DB'] = 'medic_tracker'  # Utilisez le nom de la base de données MySQL que vous avez créé
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 
-# Initialisation de la connexion à la base de données
-mysql = MySQL(app)
+# Pour mysql
 
-# Page d'affichage de la liste des patients
-@app.route('/')
-def patients_list():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM patients")
-    patients = cur.fetchall()
-    cur.close()
-    return render_template('patients_list.html', patients=patients)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://user:password@localhost/db_name'
 
-# Page d'enregistrement des patients (formulaire)
-@app.route('/add_patient', methods=['GET', 'POST'])
+db = SQLAlchemy(app)
+CORS(app)  # Permet les requêtes CORS
+
+class Patient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=False)
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(100))
+
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+with app.app_context():
+    db.create_all()
+
+@app.route('/patient', methods=['POST'])
 def add_patient():
-    if request.method == 'POST':
-        name = request.form['name']
-        gender = request.form['gender']
-        date_of_birth = request.form['date_of_birth']
-        patient_id = request.form['patient_id']
+    data = request.json
 
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO patients (name, gender, date_of_birth, patient_id) VALUES (%s, %s, %s, %s)",
-                    (name, gender, date_of_birth, patient_id))
-        mysql.connection.commit()
-        cur.close()
-        flash('Patient enregistré avec succès', 'success')
-        return redirect(url_for('patients_list'))
-    return render_template('add_patient.html')
+    new_patient = Patient(
+        name=data['name'],
+        gender=data['gender'],
+        date_of_birth=datetime.strptime(data['date_of_birth'], '%Y-%m-%d').date(),
+        phone=data['phone'],
+        email=data['email']
+    )
 
-# Page de modification des patients (formulaire)
-@app.route('/edit_patient/<int:patient_id>', methods=['GET', 'POST'])
-def edit_patient(patient_id):
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM patients WHERE id = %s", (patient_id,))
-    patient = cur.fetchone()
-    cur.close()
 
-    if request.method == 'POST':
-        name = request.form['name']
-        gender = request.form['gender']
-        date_of_birth = request.form['date_of_birth']
-        new_patient_id = request.form['patient_id']
-        
-        cur = mysql.connection.cursor()
-        cur.execute("UPDATE patients SET name = %s, gender = %s, date_of_birth = %s, patient_id = %s WHERE id = %s",
-                    (name, gender, date_of_birth, new_patient_id, patient_id))
-        mysql.connection.commit()
-        cur.close()
-        flash('Patient modifié avec succès', 'success')
-        return redirect(url_for('patients_list'))
+    try:
+        db.session.add(new_patient)
+        db.session.commit()
+        print("bien")
+        return jsonify({'message': 'Patient ajouté avec succès'}), 201
+    except Exception as e:
+        db.session.rollback()
+        print(str(e))
+        return jsonify({'error': f"Une erreur s'est produite lors de l'ajout du patient: {str(e)}"}), 500
 
-    return render_template('edit_patient.html', patient=patient)
 
-# Suppression d'un patient
-@app.route('/delete_patient/<int:patient_id>', methods=['POST'])
+@app.route('/patients', methods=['GET'])
+def get_patients():
+    patients = Patient.query.all()
+    patients_list = [patient.as_dict() for patient in patients]
+    return jsonify(patients_list)
+
+@app.route('/delete/<int:patient_id>', methods=['DELETE'])
 def delete_patient(patient_id):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM patients WHERE id = %s", (patient_id,))
-    mysql.connection.commit()
-    cur.close()
-    flash('Patient supprimé avec succès', 'success')
-    return redirect(url_for('patients_list'))
+    patient = Patient.query.get_or_404(patient_id)
+    print(patient)
+
+    try:
+        db.session.delete(patient)
+        print(" deleted")
+        db.session.commit()
+        return jsonify({'message': 'Patient supprimé avec succès'}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(str(e))
+        return jsonify({'error': f'Une erreur s\'est produite lors de la suppression du patient: {str(e)}'}), 500
+
+
+@app.route('/update/<int:patient_id>', methods=['PUT'])
+def update_patient(patient_id):
+    data = request.get_json()
+    patient = Patient.query.get_or_404(patient_id)
+
+    patient.name = data['name']
+    patient.gender = data['gender']
+    patient.date_of_birth = datetime.strptime(data['date_of_birth'], '%Y-%m-%d').date()
+    patient.phone = data['phone']
+    patient.email = data['email']
+
+    try:
+        db.session.commit()
+        print("patient updated")
+        return jsonify({'message': 'Patient modifié avec succès'})
+    except Exception as e:
+        db.session.rollback()
+        print(str(e))
+        return jsonify({'error': f'Une erreur s\'est produite lors de la modification du patient: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

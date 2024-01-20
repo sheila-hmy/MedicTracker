@@ -18,7 +18,7 @@
   
         <div class="form-group">
           <label for="dateOfBirth">Date de Naissance:</label>
-          <input id="dateOfBirth" type="date" v-model="newPatient.dateOfBirth" required />
+          <input id="dateOfBirth" type="date" v-model="newPatient.date_of_birth" required />
         </div>
   
         <div class="form-group">
@@ -59,10 +59,10 @@
     methods: {
       addPatient() {
         axios
-          .post('http://localhost:5000/patients', this.newPatient)
+          .post('http://localhost:5000/patient', this.newPatient)
           .then((response) => {
             console.log(response.data.message);
-            this.$router.push({ name: 'PatientList' }); // Rediriger vers la liste des patients après l'ajout
+            window.location.reload();
           })
           .catch((error) => {
             console.error("Une erreur s'est produite lors de l'ajout du patient", error);

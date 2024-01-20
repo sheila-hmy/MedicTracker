@@ -44,11 +44,9 @@
           <tr v-for="patient in sortedPatients" :key="patient.id">
             <td>
               <strong>{{ patient.name }}</strong><br>
-              <span class="detail-label">Date de Naissance:</span> {{ patient.dateOfBirth }}<br>
-              <span class="detail-label">Adresse e-mail:</span> {{ patient.email }}
             </td>
             <td>{{ patient.gender }}</td>
-            <td>{{ patient.dateOfBirth }}</td>
+            <td>{{ patient.date_of_birth }}</td>
             <td>{{ patient.phone }}</td>
             <td>{{ patient.email }}</td>
           </tr>

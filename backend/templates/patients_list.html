@@ -3,13 +3,62 @@
 <head>
     <title>Liste des Patients</title>
 </head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h1 {
+    color: #333;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 5px 0;
+    position: relative;
+}
+
+a {
+    color: #3498db;
+    margin-right: 10px;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #2c3e50;
+}
+
+form {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+input[type="submit"] {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+</style>
 <body>
     <h1>Liste des Patients</h1>
     <ul>
         {% for patient in patients %}
-            <li>{{ patient[1] }} - {{ patient[2] }} - {{ patient[3] }} - {{ patient[4] }}
-                <a href="{{ url_for('edit_patient', patient_id=patient[0]) }}">Modifier</a>
-                <form method="post" action="{{ url_for('delete_patient', patient_id=patient[0]) }}">
+            <li>{{ patient.patient_id }} - {{ patient.name }} - {{ patientgender }} - {{ patient.date_of_birth }}
+                <a href="{{ url_for('edit_patient', patient_id=patient.patient_id) }}" >Modifier</a>
+                <form method="post" action="{{ url_for('delete_patient', patient_id=patient.patient_id) }}">
                     <input type="submit" value="Supprimer">
                 </form>
             </li>
