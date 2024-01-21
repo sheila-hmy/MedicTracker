@@ -1,31 +1,15 @@
 <template>
   <div id="app">
-    <HeaderComponent />
-    <div class="container">
-      <SidebarComponent />
-      <MainContentComponent />
-    </div>
+    <HomePage />
   </div>
 </template>
 
 <script>
-import HeaderComponent from './components/HeaderComponent.vue';
-import SidebarComponent from './components/SidebarComponent.vue';
-import MainContentComponent from './components/MainContentComponent.vue';
-// import DashboardComponent from './components/DashboardComponent.vue';
+import HomePage from './components/HomePage.vue';
 
 export default {
   components: {
-    HeaderComponent,
-    SidebarComponent,
-    MainContentComponent,
-    // DashboardComponent
+    HomePage
   }
 }
 </script>
-
-<style>
-.container {
-  display: flex;
-}
-</style>
