@@ -98,7 +98,7 @@
   }
   
   button {
-    background-color: #007bff;
+    background-color: #1E3856;
     color: #fff;
     padding: 12px;
     border: none;

@@ -2,7 +2,6 @@
   <div id="app">
     <div v-if="$route.name !== 'add-patient'">
       <nav>
-        <router-link to="/test">Test</router-link> |
         <router-link to="/patients" class="btn-link">Liste des Patients</router-link> |
         <router-link to="/add-patient" class="btn-link">Ajouter un patient</router-link> |
         <router-link to="/edit-patient" class="btn-link">Modifier un patient</router-link> |
@@ -40,7 +39,7 @@ nav {
 .btn-link {
   display: inline-block;
   padding: 10px;
-  background-color: #42b983;
+  background-color: #1E3856;
   color: #fff;
   text-decoration: none;
   border-radius: 5px;
@@ -53,6 +52,6 @@ nav a {
 }
 
 nav a.router-link-exact-active {
-  color: #42b983;
+  color: #1E3856;
 }
 </style>
